@@ -12,7 +12,6 @@
 % When you plot the data in Cartesian you will see how the room did look
 % from the perspective of the moving platform.
 
-
 % IMPORTANT ==> Read the program and comments, before trying to modify it, and before asking. 
 
 

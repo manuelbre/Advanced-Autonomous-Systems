@@ -1,4 +1,4 @@
-function OOI = ExtractOOIs(X, Y, intens)
+function OOI = ExtractOOIs(X, Y, intens, use_circle_fit)
     % Extract Object of interest out of laser scan data
     %
     % INPUT:
@@ -15,53 +15,36 @@ function OOI = ExtractOOIs(X, Y, intens)
     OOI.Centers = [];
     OOI.Diameters   = [];
     OOI.Color = [];
-    OOI.circle_MSE = [];
     OOI.p_c = {};
     X_ = X;
     Y_ = Y;
     finished = false;
+    
     while ~finished
         [Success, finished, Centers, Diameters, p_c, intensities_c, next_idx] = ...
-                                       extractCluster(X_, Y_, intens);
+                                       extractCluster(X_, Y_, intens, use_circle_fit);
         
         
         if Success
+            assert(Success);
+            assert(isequal(size(Centers), [1, 2]))
+            assert(isequal(size(Diameters), [1, 1]))
+            assert(Diameters <= 0.2 && Diameters >= 0.05)
+            
             OOI.N = OOI.N + Success;
             OOI.Centers = [OOI.Centers; Centers];
             OOI.p_c(OOI.N) = {p_c};
             OOI.Diameters = [OOI.Diameters; Diameters];
             OOI.Color = [OOI.Color; any(intensities_c > 0)];
+            assert(size(OOI.Centers,1) == OOI.N)
+            assert(size(OOI.Diameters,1) == OOI.N)
+            assert(isequal(size(OOI.Color), [OOI.N, 1]))
+
         end
         
         X_ = X_(next_idx:end, :);
         Y_ = Y_(next_idx:end, :);
         intens = intens(next_idx:end);
     end
-    
-    
-    %%%% Cirlce fitting %%%%%
-    
-%     sizes_circle_fitting = [];
-%     for i = 1:OOI.N
-%         n = size(OOI.p_c{i},1);
-%         par = CircleFitByPratt(OOI.p_c{i});
-%         x_m = par(1);
-%         y_m = par(2);
-%         r_m = par(3);
-%         sizes_circle_fitting = [sizes_circle_fitting;...
-%             r_m*2];
-%         circle_MSE = abs( (r_m).^2 - ((OOI.p_c{i}(:,1) - x_m) .^2 + ...
-%             (OOI.p_c{i}(:,2) - y_m) .^2 ));
-%         OOI.circle_MSE = [OOI.circle_MSE ; sum(circle_MSE)/n];
-%         
-%     end
-%     
-%     %   Within Radius
-%     size_range = [0.05 0.2];
-%     mask = sizes_circle_fitting < size_range(2) & ...
-%         sizes_circle_fitting > size_range(1);
-
-%     TODO: Uncomment next line
-%     scatter(OOI.Centers(mask(:),1), OOI.Centers(mask(:),2),'ks')
 
 end

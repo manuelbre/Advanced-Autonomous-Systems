@@ -33,11 +33,9 @@ load(file);
     % Create graphical object for refreshing data during program execution.
     figure(1) ; clf(); 
     
-    h.all_scans = plot(0,0,'b.');      % all laser points
-    hold on;
-    h.HR = plot(0,0,'r+');             % highly reflective aser points
-    h.OOI_brilliant = plot(0,0,'g*');  % objects of interest which are ...
-                                       % brilliant
+    h.all_scans = plot(0,0,'b.');      % to be used for showing the laser points
+    h.HR = plot(0,0,'r+');
+    h.OO_brilliant = plot(0,0,'g*');
     
     axis([-10,10,0,20]);                % focuses plot on this region ( of interest in L220)
     xlabel('Y [m]');
@@ -96,6 +94,8 @@ function ProcessingOfScan(scan,t,mh,i)
     % 'i' : scan number.
     % 'mh'  : struct contaning handles of necessary graphical objects.
     
+    angles = [0:360]'*0.5 ;         % Associated angle for each range of scan
+    % same as in "dataL.angles".
     
     % scan data is provided as a array of class uint16, which encodes range
     % and intensity (that is the way the sensor provides the data, in that
@@ -116,16 +116,13 @@ function ProcessingOfScan(scan,t,mh,i)
     Y = sin(angles).*ranges;
     
     % Extract OOI
-    tic
     OOIs = ExtractOOIs(X, Y, intensities) ;
-    toc
     
     % and then refresh the data in the plots...
     set(mh.all_scans,'xdata',X,'ydata',Y);
-    set(mh.HR,'xdata',X(intensities ~= 0),'ydata',Y(intensities ~= 0));
-    set(mh.OOI_brilliant,'xdata',OOIs.Centers(OOIs.Color ~= 0, 1), ...
-                         'ydata',OOIs.Centers(OOIs.Color ~= 0, 2));
-    
+    set(mh.HR,'xdata',X,'ydata',Y);
+
+
     % and some text...
     s= sprintf('Laser scan # [%d] at time [%.3f] secs',i,t);
     set(mh.title,'string',s);

@@ -6,11 +6,17 @@
 % This file is altered from the template file provide in the class.
 
 function main(file)
+% Add that folder plus all subfolders to the path.
+dirs = fileparts(which(mfilename)); 
+addpath(genpath(dirs));
 
 % Params
 start = 1;
-increment = 1; 
-use_circle_fit = true;
+increment = 1;
+freq = 100; % [Hz]
+t_pause = 1.0/freq; % [s]
+settings.use_circle_fit = false;
+settings.verbose = true;
     
 global ABCD;
 ABCD.flagPause=0;
@@ -38,9 +44,9 @@ while 1
     % t: time expressed in seconds, relative to the time of the first scan.
     
     scan_i = dataL.Scans(:,i);
-    ProcessingOfScan(scan_i, t, h, i, use_circle_fit);   % Process scan
+    ProcessingOfScan(scan_i, t, h, i, settings);   % Process scan
 
-    pause(0.01) ;                   % wait for ~10ms (approx.)
+    pause(t_pause) ;                   % wait for ~10ms (approx.)
     i=i+increment;
 end
 
@@ -53,6 +59,7 @@ function h = create_figure(dataL, file)
         % --------------------------------------
     % Create graphical object for refreshing data during program execution.
     figure(1) ; clf(); 
+
     
     h.all_scans = plot(0,0,'b.');      % all laser points
     hold on;
@@ -65,6 +72,8 @@ function h = create_figure(dataL, file)
     ylabel('X [m]');
     
     h.title = title('');           % create an empty title..
+    h.legend = legend('raw laserscan', 'highly reflecting', 'brilliant OOI');
+
     zoom on ;  grid on;
             
     fprintf('\nThere are [ %d ] laser scans in this dataset (file [%s])\n',dataL.N,file);
@@ -75,7 +84,7 @@ function h = create_figure(dataL, file)
 
 end
 
-function ProcessingOfScan(scan, t, mh, i, use_circle_fit)
+function ProcessingOfScan(scan, t, mh, i, settings)
     % Function to proccess data from scans and refreshs figure with new
     % data.
     % This function is altered from template file provided in class.
@@ -107,8 +116,10 @@ function ProcessingOfScan(scan, t, mh, i, use_circle_fit)
     
     % Extract OOI
     tic
-    OOIs = ExtractOOIs(X, Y, intensities, use_circle_fit);
-    toc
+    OOIs = ExtractOOIs(X, Y, intensities, settings.use_circle_fit);
+    if settings.verbose
+        toc
+    end
     
     % refresh the data in the plot
     set(mh.all_scans,'xdata',X,'ydata',Y);

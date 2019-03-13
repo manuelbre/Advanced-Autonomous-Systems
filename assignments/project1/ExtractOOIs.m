@@ -39,6 +39,7 @@ function OOI = ExtractOOIs(X, Y, intens, use_circle_fit)
             assert(size(OOI.Centers,1) == OOI.N)
             assert(size(OOI.Diameters,1) == OOI.N)
             assert(isequal(size(OOI.Color), [OOI.N, 1]))
+            assert(OOI.Color(end) == 0 || OOI.Color(end) == 1)
 
         end
         

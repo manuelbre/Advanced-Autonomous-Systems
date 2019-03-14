@@ -89,7 +89,7 @@ for i = 1:size(P,1)
                     % Get distance of all points to Cluster center
                     dists = sum((Center - p_cluster).^2, 2);
                     if all(dists < r_range_squared(2)) && ... % Check if all the points are within upper diameter range
-                            max(dists) > r_range_squared(1)   % Check if the largest distance is larger than minimal diameter
+                            max(dists) > r_range_squared(1) % Check if the largest distance is larger than minimal diameter
 
                      % Found cluster. Add it to final set.
                      success = true;
@@ -106,7 +106,7 @@ for i = 1:size(P,1)
                     end
                 else
                     % Discard current cluster.
-                    % Because there are not enough points in cluster.
+                    % Not enough points in cluster.
                         [success, Center, Diameter, p_cluster, ...
                             intensities_c] = discardCluster();
 
@@ -149,7 +149,7 @@ end
 function [success, Center, Diameter, p_cluster, intensities_c] = discardCluster()
     success = false;
     Center = [];
-    Diameter = [];
+    Diameter = 0;
     p_cluster = [];
     intensities_c = [];
 end

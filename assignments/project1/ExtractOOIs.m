@@ -10,12 +10,12 @@ function OOI = ExtractOOIs(X, Y, intens, use_circle_fit)
     % OUTPUT:
     %       - OOI: Struct of Objects of Interests with an apparent
     %              Diameter, Center and Color.
-
     OOI.N = 0; 
     OOI.Centers = [];
     OOI.Diameters   = [];
     OOI.Color = [];
     OOI.p_c = {};
+    
     X_ = X;
     Y_ = Y;
     finished = false;

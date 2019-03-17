@@ -59,7 +59,6 @@ function h = create_figure(dataL, file)
         % --------------------------------------
     % Create graphical object for refreshing data during program execution.
     figure(1) ; clf(); 
-
     
     h.all_scans = plot(0,0,'b.');      % all laser points
     hold on;
@@ -67,12 +66,13 @@ function h = create_figure(dataL, file)
     h.OOI_brilliant = plot(0,0,'g*');  % objects of interest which are ...
                                        % brilliant
     
-    axis([-10,10,0,20]);                % focuses plot on this region ( of interest in L220)
+    axis([-10,10,0,20]);               % focuses plot on this region ( of interest in L220)
     xlabel('Y [m]');
     ylabel('X [m]');
+    %     h.legend = legend('raw laserscan', 'highly reflecting', 'brilliant OOI');
+
     
     h.title = title('');           % create an empty title..
-    h.legend = legend('raw laserscan', 'highly reflecting', 'brilliant OOI');
 
     zoom on ;  grid on;
             
@@ -95,24 +95,8 @@ function ProcessingOfScan(scan, t, mh, i, settings)
     %       - 'i' : scan number.
     %       - 'mh'  : struct contaning handles of necessary graphical objects.
     
-    
-    % scan data is provided as a array of class uint16, which encodes range
-    % and intensity (that is the way the sensor provides the data, in that
-    % mode of operation)
-     
-    % We extract range and intensity, here.
-    %useful masks, for dealing with bits.
-    mask1FFF = uint16(2^13-1);
-    maskE000 = bitshift(uint16(7),13)  ;
-
-    intensities = bitand(scan,maskE000);  
-    ranges    = single(bitand(scan,mask1FFF))*0.01; % [m]
-    % Ranges expressed in meters, and unsing floating point format (e.g. single).
-
-    % 2D points, expressed in Cartesian. From the sensor's perpective.
-    angles = [0:360]'*0.5* pi/180 ;  % associated angle, for each individual range in a scan
-    X = cos(angles).*ranges; % [m]
-    Y = sin(angles).*ranges; % [m]
+    % Convert scan data to cartestian coordinates
+    [X, Y, intensities] = convertScan2Cartesian(scan);
     
     % Extract OOI
     tic

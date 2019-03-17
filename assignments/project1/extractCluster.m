@@ -135,9 +135,13 @@ if all(dists < r_range_squared(2)) && ... % Check if all the points are within u
     max(dists) > r_range_squared(1) && ...% Check if the largest distance is larger than minimal diameter
     size(p_cluster,1) >= threshold_n_points % Check if enough points are part of cluster
 
-     % Found cluster. Add it to final set.
-     success = true;
-     Diameter = sqrt(r_squared) * 2;
+    % Found cluster. Add it to final set.
+    success = true;
+    if use_circle_fit
+       Diameter = sqrt(r_squared) * 2;                
+    else
+       Diameter = sqrt(max(dists)) * 2;
+    end
 else
     % Points are not in the threshold therefore it is
     % does not satisfy OOI definition

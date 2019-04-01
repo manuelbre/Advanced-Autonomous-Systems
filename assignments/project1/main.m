@@ -1,4 +1,4 @@
-%% DECRIPTON
+%% DESCRIPTON
 % Process laserdata receives in polar form from a laser scanner (LIDAR).
 % This function reads the data, converts it into cartesian coordinates,
 % extracts objects of interests (OOI) and shows the results in plots.
@@ -16,7 +16,7 @@ increment = 1;
 freq = 100; % [Hz]
 t_pause = 1.0/freq; % [s]
 settings.use_circle_fit = false;
-settings.verbose = true;
+settings.verbose = false;
     
 global ABCD;
 ABCD.flagPause=0;
@@ -27,7 +27,7 @@ if ~exist('file','var'), file ='Laser__2.mat'; end;
 % Load Scans from file
 load(file); 
 % Create figure handle
-h = create_figure(dataL, file); 
+h = create_figure(dataL, file);
 
 % Loop through the scans.
 N = dataL.N; 
@@ -62,13 +62,13 @@ function h = create_figure(dataL, file)
     
     h.all_scans = plot(0,0,'b.');      % all laser points
     hold on;
-    h.HR = plot(0,0,'r+');             % highly reflective aser points
+    h.HR = plot(0,0,'r+');             % highly reflective laser points
     h.OOI_brilliant = plot(0,0,'g*');  % objects of interest which are ...
                                        % brilliant
     
     axis([-10,10,0,20]);               % focuses plot on this region ( of interest in L220)
-    xlabel('Y [m]');
-    ylabel('X [m]');
+    xlabel('X [m]');
+    ylabel('Y [m]');
     %     h.legend = legend('raw laserscan', 'highly reflecting', 'brilliant OOI');
 
     

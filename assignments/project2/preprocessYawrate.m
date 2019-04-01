@@ -1,18 +1,18 @@
 
-function [X, Y] = estimatePosition(v, theta, t);
-    %% Descripton
-    % Integrate velocity data to stimate position in global coordinate frame.
+function [yaw_rate] = preprocessYawrate(yaw_rate, t, opt)
+    %% Decsription
+    % Debiasing and change of coordinate frame for gyroscope yaw rate.
     % 
     % INPUT:
-    %       - v (1XN): Robot Velocity [m/s]
-    %       - theta (1XN): Robot Yaw in global coordinate Frame[rad]
+    %       - yaw_rate (1XN): Yaw rate of robot [rad/s]
     %       - t (1xN): Time [s]
+    %       - options (struct): Settings for
     %
     % OUTPUT:
-    %       - X (1xN): Integrated yaw [rad]
+    %       - theta (1xN): Integrated yaw [rad]
     %
     
-    %%
+    %% Init
     % Params
     
     % Settings
@@ -24,10 +24,9 @@ function [X, Y] = estimatePosition(v, theta, t);
     
     % Variables
     N = length(t);
-    theta = zeros(1,N) + opt.theta_start;
     idx_statioary = find(t<=opt.t_stationary, 1, 'last');
     opt.theta_stationary = zeros(1,idx_statioary);
-    %%
+    %% Logic
     
     % Depending on convention on coordinate system need to invert frame
     yaw_rate = yaw_rate*(-1)^(opt.inverted);
@@ -35,12 +34,8 @@ function [X, Y] = estimatePosition(v, theta, t);
     % Estimate bias while vehicle is stationary
     yaw_rate_bias = mean(yaw_rate(1:idx_statioary));
     
-    % Integrate angular rate
-    for i = 2:N
-        dt = t(i) - t(i-1);
-        theta(i) = (theta(i-1)  + (yaw_rate(i) - yaw_rate_bias)*dt );
-    end
-        
     % Debias
+    yaw_rate = yaw_rate - yaw_rate_bias;
+        
 %     theta = wrapTo2Pi(theta);
 end

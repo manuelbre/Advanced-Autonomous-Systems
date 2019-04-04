@@ -259,7 +259,7 @@ for i=1:Li
             % Evaluate residual (innovation)  "Y-h(Xe)" 
             %(measured output value - expected output value)
             z  = [MeasuredRanges(u) - ExpectedRange; ...
-                  MeasuredAlphas(u) - ExpectedAlpha];
+                  wrapToPi(MeasuredAlphas(u) - ExpectedAlpha)];
 
             % ------ covariance of the noise/uncetainty in the measurements
             R = [stdev_rangeMeasurement*stdev_rangeMeasurement*4 0 ;...
@@ -309,7 +309,10 @@ return
 % --- THIS IS THE PROCESS MODEL of MY SYSTEM. (it is a Kinemetic model)
     
 function Xnext = RunProcessModel(X,speed,GyroZ,dt) 
-    Xnext = X + dt*[ speed*cos(X(3)) ;  speed*sin(X(3)) ; GyroZ - X(4) ; 0] ;
+    Xnext = X + dt*[ speed*cos(X(3))  ; ...
+                     speed*sin(X(3))  ; ...
+                     GyroZ - X(4)     ; ...
+                     0                ];
 return ;
 
 
@@ -488,9 +491,6 @@ quiver(Xreal_History(1,ii),Xreal_History(2,ii),m*cos(Xreal_History(3,ii)),m*sin(
 quiver(Xe_History(1,ii),Xe_History(2,ii),m*cos(Xe_History(3,ii)),m*sin(Xe_History(3,ii)),'r','AutoScale','off','Marker','+') ;
 quiver(Xdr_History(1,ii),Xdr_History(2,ii),m*cos(Xdr_History(3,ii)),m*sin(Xdr_History(3,ii)),'m','AutoScale','off','Marker','o' ) ;
 
-
-
-
 axis equal ;
 
 title('Path') ;
@@ -516,10 +516,10 @@ subplot(3,1,1) ; plot(Xreal_History(1,:)-Xe(1,:)) ;ylabel('x-xe (m)') ;
 title('Performance Dead Reckoning (usually, not good)') ;
 subplot(3,1,2) ; plot(Xreal_History(2,:)-Xe(2,:)) ;ylabel('y-ye (m)') ;
 subplot(3,1,3) ; plot(180/pi*(Xreal_History(3,:)-Xe(3,:))) ;ylabel('heading error (deg)') ;
-
-% Determinant of S
-figure(5) ; clf ; 
-plot(Sdet_history)
+ 
+% % Determinant of S
+% figure(5) ; clf ; 
+% plot(Sdet_history)
 
 Xe=[];
 

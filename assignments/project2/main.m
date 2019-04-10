@@ -99,7 +99,7 @@ addpath(path_project1);
 % Sanity checks
 assert(isequal(t_raw_IMU, t_raw_v));
 
-%% Estimate yaw in global coordinate frame from IMU data.
+%% Part A) - Estimate yaw in global coordinate frame from IMU data.
 theta = estimateAttitude(yaw_rate, t_w, attitude_set);
 theta_plot = rad2deg(theta);
 
@@ -110,7 +110,7 @@ grid('on');
 xlabel('t [s]');
 ylabel('\theta_B [deg]');
 
-%% Estimate position in global frame
+%% Part B) - Estimate position in global frame
 assert(isequal(t_v, t_w))
 [X, Y] = estimatePosition(v, theta, t_v);
 
@@ -126,7 +126,7 @@ grid('on');
 xlabel('x [m]');
 ylabel('y [m]');
 
-%% Plot OOI in global coordinate frame
+%% Part C) & D) - Plot OOI in global coordinate frame and Data Association
 
 % Create figure handle
 OOI_fig = laserdata_figure(); 

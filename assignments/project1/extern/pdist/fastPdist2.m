@@ -1,11 +1,12 @@
 function [ D ] = fastPdist2( X,Y)
-%PDIST2 computes the squared euclidean distance between rows of X and rows
-%of Y
-%input:
-% X - n*d n rows in d dimensions
-% Y - m*d m rows in d dimensions
-%output:
-% D - n*m D_ij = norm(X(i,:)-Y(j,:))^2
+% Function copied from https://github.com/maksimt/matlab_funcs
+% PDIST2 computes the squared euclidean distance between rows of X and rows
+% of Y
+% input:
+%  X - n*d n rows in d dimensions
+%  Y - m*d m rows in d dimensions
+% output:
+%  D - n*m D_ij = norm(X(i,:)-Y(j,:))^2
 
 [n,dx] = size(X);
 [m,dy] = size(Y);

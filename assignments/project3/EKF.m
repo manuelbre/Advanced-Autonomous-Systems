@@ -1,5 +1,9 @@
-%% DemoEKF.m - version 2018.1
-% MRTN4010 - S1.2018
+%% Solution to T1 2019 MTRN4010 Advanced Autonomous Systems
+% Project 3 Part 1) and 2)
+%
+% This file is slightly adapted from the DemoEKF_2018.m file provided by the
+% lecturer
+%
 % Example using Extended Kalman Filter (EKF) for the localization problem, using LIDAR range observations.
 
 
@@ -78,10 +82,12 @@ stdDevGyro = 2*pi/180 ;
 % bias, the random error present in the gyros' measurements should be lower than 2 deg/sec.
 % so, this one seems realistic.
 
+% Part 2)
 % Bias of Gyroscope  yaw rate (1 degree/s)
 bias_Gyro = -1 / 180 * pi ;    
 
 % Standard deviation of the Gyros Bias estimation (2 degree/s)
+% Part 2)
 stdev_bias_Gyro = 2 / 180 * pi;
 
 % Standard deviation of the error in the speed's measurements
@@ -125,14 +131,17 @@ NavigationMap = CreateSomeMap(n_usedLanmarks) ;  %creates a artificial map!
 % In variables "Xe" and "P" :These are the EKF ESTIMATES (Expected value and covariance matrix)
 % Initial conditions of the estimates (identical to the real ones, as in
 % the lab)( I Assume we know the initial condition of the system)
+% Part 2)
 Xe = [ 0; 0; pi/2 ; 0] ;        % initial state X_0 = [x_0; y_0; phi_0; bias_w_0]
 P = zeros(size(Xe,1)) ;      % initial quality --> perfect (covariance =zero )
 P(4,4) = stdev_bias_Gyro.^2 ;      % initial quality of gyro.
 
+% Part 2)
 P_u = [stdDevSpeed.^2 0;...
        0   stdDevGyro.^2];  % initial input quality
 % Why perfect? (BECAUSE in this case we DO ASSUME we know perfectly the initial condition)
 
+% Part 2)
 % These are the "open-loop" dead reckoning ESTIMATES
 Xdr = [ 0; 0; pi/2; 0] ;
 
@@ -147,10 +156,11 @@ Sdet_History = zeros(1, Li) ;
 % I assume that every time we apply the process model to predict the evolution of the system for a 
 % perdiod of time of Dt (50ms) we introduce uncertainty of 0.01m standard deviation on X, 
 % similar uncertainty on Y and 1 degree (a lot!) on the heading's estimation
-% Q  =zeros(3,3) ;  Q(1,1) = (0.01)^2 ; Q(2,2) =Q(1,1)  ; Q(3,3) = (1*pi/180)^2 ;
+% Q  = zeros(3,3) ;  Q(1,1) = (0.01)^2 ; Q(2,2) =Q(1,1)  ; Q(3,3) = (1*pi/180)^2 ;
 % Although you can use this proposed Q, it can be improved. Read
 % "MTRN4010_L06_Noise_in_the_inputs_of_ProcessModel.pdf" in order to implement a good refinement. 
 
+% Part 1) b) and Part 2)
 Q_processModel = diag( [ (0.01)^2 ,(0.01)^2 , (1*pi/180)^2, 0]) ;
 % Q matrix. Represent the covariance of the uncertainty about the process model.
 % .....................................................
@@ -200,6 +210,7 @@ for i=1:Li
             0             Dt;
             0              0];
     
+    % Part 1) b)
     % Combine uncertainty about input and uncertainty about process model
     Q = J_u*P_u*J_u.' + Q_processModel;
     
@@ -253,6 +264,7 @@ for i=1:Li
             % the expected distances to this landmark ( "h(Xe)" )
             ExpectedRange = eDD ;   % just a coincidence: we already calculated them for the Jacobian, so I reuse it. 
             
+            % Part 1) a)
             % the expected angle to this landmark
             ExpectedAlpha = atan2(eDY,eDX) - Xe(3) + pi/2;
         
@@ -261,13 +273,13 @@ for i=1:Li
             z  = [MeasuredRanges(u) - ExpectedRange; ...
                   wrapToPi(MeasuredAlphas(u) - ExpectedAlpha)];
 
-            % ------ covariance of the noise/uncetainty in the measurements
+            % ------ covariance of the noise/uncertainty in the measurements
             R = [stdev_rangeMeasurement*stdev_rangeMeasurement*4 0 ;...
                 0 stdev_alphaMeasurement*stdev_alphaMeasurement];
         
             % Some intermediate steps for the EKF (as presented in the lecture notes)
             S = R + H*P*H' ;
-            iS = inv(S);                 % iS = inv(S) ;   % in this case S is 1x1 so inv(S) is just 1/S
+            iS = inv(S);            % iS = inv(S) ;   % in this case S is 1x1 so inv(S) is just 1/S
             K = P*H'*iS ;           % Kalman gain
             % ----- finally, we do it...We obtain  X(k+1|k+1) and P(k+1|k+1)
             
@@ -323,7 +335,8 @@ return ;
 
 
 function [ranges, alphas, IDs] = GetMeasurementsFomNearbyLandmarks(X,map)
- 
+    % Part 1) a)
+    
     if map.nLandmarks>0
         dx= map.landmarks(:,1) - X(1) ;
         dy= map.landmarks(:,2) - X(2) ;
@@ -505,6 +518,7 @@ subplot(4,1,2) ; plot(Xreal_History(2,:)-Xe(2,:)) ;ylabel('y-ye (m)') ;
 subplot(4,1,3) ; plot(180/pi*(Xreal_History(3,:)-Xe(3,:))) ;ylabel('heading error (deg)') ;
 subplot(4,1,4) ; plot(180/pi*(Xreal_History(4,:))); ylabel('bias (deg/s)') ;
 hold on;
+% Part 2)
 subplot(4,1,4) ; plot(180/pi*(Xe(4,:))) ; ylabel('bias (deg/s)') ;
 hold off;
 legend('real gyroscop bias','estimates gyroscop bias')
@@ -516,10 +530,6 @@ subplot(3,1,1) ; plot(Xreal_History(1,:)-Xe(1,:)) ;ylabel('x-xe (m)') ;
 title('Performance Dead Reckoning (usually, not good)') ;
 subplot(3,1,2) ; plot(Xreal_History(2,:)-Xe(2,:)) ;ylabel('y-ye (m)') ;
 subplot(3,1,3) ; plot(180/pi*(Xreal_History(3,:)-Xe(3,:))) ;ylabel('heading error (deg)') ;
- 
-% % Determinant of S
-% figure(5) ; clf ; 
-% plot(Sdet_history)
 
 Xe=[];
 

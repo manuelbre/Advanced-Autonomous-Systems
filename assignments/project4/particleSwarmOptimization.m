@@ -119,10 +119,3 @@ fitness = 1 ./ sqrt( (X_end(1) - X_T(1)).^2 + (X_end(1) - X_T(1)).^2 + ...
                (X_end_theta - X_T_theta).^2 );
 
 end
-
-% function h = create
-%     figure(2)
-%     surf(particles.positions, particles.velocities, particles.personalBests.val)
-%     xlabel('Virtual Target Distance [m]')
-%     ylabel('Particle Velocity [-]')
-%     zlabel('Particle Fitness [-]')

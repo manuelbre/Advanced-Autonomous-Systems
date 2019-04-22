@@ -82,17 +82,6 @@ for gen = 1:n_g
     
     disp(sprintf("Global best fitness of generation %d is %0.5f with virt target distance of %0.5f\n", gen, ...
                        particles.globalBest.val, particles.globalBest.pos));
-                                            
-    figure(2)
-    [X,Y] = meshgrid(d_virt_T_range(1):d_virt_T_range(2), ...
-                     part_vel_range(1):part_vel_range(2));
-    vq = griddata(particles.positions, particles.velocities, ...
-         particles.personalBests.val, X, Y);
-    surf(vq)
-    xlabel('Virtual Target Distance [m]')
-    ylabel('Particle Velocity [-]')
-    zlabel('Particle Fitness [-]')
-    colorbar;
     pause(0.001)
 end
 

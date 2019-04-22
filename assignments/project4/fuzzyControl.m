@@ -21,8 +21,6 @@ function [X_end, X_T] = fuzzyControl (map_range, d_virt_T_0, t_end, dt, disp_sim
 
 %% INITIALIZATION
 
-% Preprocessing
-close all;
 % Add that folder plus all subfolders to the path.
 dirs = fileparts(which(mfilename)); 
 addpath(genpath(dirs));
@@ -79,8 +77,6 @@ ang_fis = readfis(ang_fis_file);
 % Disp figure flag
 disp_sim_default = true;
 if ~exist('disp_sim','var'), disp_sim = disp_sim_default; end
-
-
 
 %% FUNCTIONALITY
 X = [S; S_theta]; % Robot state [x; y; theta]
@@ -214,6 +210,7 @@ h.trace = plot(X_0(1), X_0(2), 'color', [0 0.66 0]);
 h.robot = plot(h.robot_shape(1,:), h.robot_shape(1,:), 'color', 'b', 'linewidth', 2);
 h.virt_T = plot(h.robot_shape(1,:), h.robot_shape(1,:), 'color', 'm', 'linewidth', 2);
 h.T = plot(h.robot_shape(1,:), h.robot_shape(1,:), 'color', 'g', 'linewidth', 2);
+legend('Robot Trace','Robot', 'Virtual Target', 'Real Target','AutoUpdate','off');
 
 hold off;
 end

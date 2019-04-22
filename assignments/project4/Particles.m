@@ -1,9 +1,13 @@
 classdef Particles < handle
    %% DESCRIPTION
+   %
    % Class for particle swarm optimization. The swarm consists of multiple
    % particles, each has an assigned velocity and position.
    % This function assumes at the moment only a one decision variable but
    % can be extended to be suitable for multiple decision variables.
+   %
+   % Particle swarms can be used to find the best hyperparameter for a
+   % given problem statement.
    
    %%
    properties

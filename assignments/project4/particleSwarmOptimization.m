@@ -1,10 +1,8 @@
 function [] = particleSwarmOptimization (vel_fis_file, ang_fis_file)
 %% DESCRIPTION
 %
-% Simple Fuzzy control of a mobile robot. The goal is to move the robot ...
-% from a start position S to a target positon T. This script is used to ...
-% to demonstrate a simple, non-optimized version of fuzzy control.
-%
+% Particle Swarm Optimization is used to find the best hyperparameter ...
+% for the fuzzy control control of a mobile robot. 
 
 %% INITIALIZATION
 
@@ -20,7 +18,7 @@ warning('off', 'Fuzzy:evalfis:InputOutOfRange')
 % % % % % % % % % Params % % % % % % % % % % % % 
 
 % Number of generations
-n_g = 2;
+n_g = 20;
 % Number of Particles
 n_p = 10;
 
@@ -40,7 +38,7 @@ c_g = 1;
 t_end = 300;
 
 % Timestep [s]
-dt = 0.1;
+dt = 1;
 
 % Disp flag
 disp_sim = false;
@@ -63,6 +61,8 @@ disp("-------------------------------------------------")
 disp("-------------------------------------------------")
 pause(0.001)
 
+fitness_hist = [];
+virt_dist_hist = [];
 for gen = 1:n_g    
     for p_idx = 1:n_p
         d_virt_T_0 = particles.getPosition(p_idx);
@@ -82,6 +82,9 @@ for gen = 1:n_g
     
     disp(sprintf("Global best fitness of generation %d is %0.5f with virt target distance of %0.5f\n", gen, ...
                        particles.globalBest.val, particles.globalBest.pos));
+    fitness_hist = [fitness_hist; particles.globalBest.val];
+    virt_dist_hist = [virt_dist_hist; particles.globalBest.pos];
+    
     pause(0.001)
 end
 
@@ -92,6 +95,20 @@ disp("-------------------------------------------------")
 disp(sprintf("Best particle has virtual target distance %0.5f with a fitness of %0.5f\n", ...
                     particles.globalBest.pos, particles.globalBest.val))
 
+% Plot results
+figure()
+title('Results');
+subplot(2,1,1)
+plot(1:n_g, 1./ fitness_hist,'k')
+xlabel('Number of Generation [-]') 
+ylabel('Smalles Error of Generation') 
+
+subplot(2,1,2)
+plot(1:n_g(end, :, 1), virt_dist_hist, '*-k');
+xlabel('Number of Generation [-]') 
+ylabel('Best Virtual Target dist of Generation [m]')            
+
+% simulate with best particle
 disp_sim = true;
 [X, X_T] = fuzzyControl (map_range, particles.globalBest.pos, t_end, ...
             dt, disp_sim, vel_fis_file, ang_fis_file);

@@ -1,8 +1,10 @@
-function []= pathPlanningGeneticAlgorithm()
+function [] = pathPlanningGeneticAlgorithm()
 %% DESCRIPTION
 %  
 %  Path planning of a simulated mobile robot with help of genetic ...
-%  algorithms
+%  algorithms.
+%  The goal is to visit every landmark in a certain order such that the ...
+%  path mhasinimial length.
 %
 %% MISC
 clc; clear all; close all;
@@ -82,10 +84,21 @@ xlabel('Number of Generation [-]')
 ylabel('Best Path Distance of Generation [m]') 
 
 subplot(2,1,2)
-plot(best_path_hist(end, :, 1), best_path_hist(end, :, 2),'-*m')
+p = plot(best_path_hist(end, :, 1), best_path_hist(end, :, 2),'-*k');
+drawnow
+cd = [uint8(jet(n_landmarks+2)*255) uint8(ones(n_landmarks+2,1))].';
+drawnow
+set(p.Edge, 'ColorBinding','interpolated', 'ColorData',cd)
 hold on;
-plot(S(1), S(2), '-*g')
-plot(T(1), T(2), '-*g')
+plot(S(1), S(2), '-dg')
+t = text(S(1)+0.1,S(2), '\leftarrow Start');
+t.Color = 'g';
+plot(T(1), T(2), '-dr')
+t = text(T(1)+0.1, T(2), '\leftarrow End');
+t.Color = 'r';
+
+
+
 
 xlabel('X [m]') 
 ylabel('Y [m]') 

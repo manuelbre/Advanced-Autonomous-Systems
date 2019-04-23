@@ -13,7 +13,7 @@ Finally in project 3 an Extended Kalman Filter (EKF) is used for sensor fusion.
 Project 4 on the other hand is independent on the other projects and is about genetic algorithms.
 
 ### Project 1
-[Project 1]((./assignments/project1)
+[Project 1](./assignments/project1)
 
 ### Clustering of Lidar data
 The task of this projects was to preprocess bearing and range measurements of the Lidar and cluster them based on some given criteria.
@@ -22,7 +22,7 @@ The task of this projects was to preprocess bearing and range measurements of th
 
 
 ### Project 2
-[Project 2]((./assignments/project2)
+[Project 2](./assignments/project2)
 
 The goal of this project was to use IMU data to calculate the position of a wheeled robot.
 
@@ -33,7 +33,7 @@ The goal of this project was to use IMU data to calculate the position of a whee
 ![Alt text](./assignments/project2/results/plot_robot_pos.gif?raw=true "Path Video.")
 
 ### Project 3
-[Project 4]((./assignments/project3)
+[Project 3](./assignments/project3)
 
 
 #### Extended Kalman Filter with Simulated Data
@@ -52,6 +52,8 @@ In the following we can see that the EKF performs very well and is far better th
 ![Alt text](./assignments/project3/results/plot_ekf_real_end.png?raw=true "Real Data EKF End Time.")
 
 ### Project 4
+
+[Project 4](./assignments/project4)
 
 #### Genetic Algorithm for Path planning.
 Path planning of a simulated mobile robot with help of genetic algorithms.The goal is to visit every landmark in a certain order such that the path has minimial length.

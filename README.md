@@ -45,11 +45,9 @@ In the following image one can see the difference between the simple integration
 #### Extended Kalman Filter with Real Data
 In this part real IMU and Lidar data of a wheeled mobile has been used to estimate the state of the robot with help of the EKF. Further the EKF estimates the Yawrate bias. In addition we removed the velocity data of the robot and estimate also the velocity.
 
-In the following we can see that the EKF performs very well and is far better than the simple IMU data integration.
+In the following we can see that the EKF performs very well and outperforms the simple IMU data integration clearly.
 
-![Alt text](./assignments/project3/results/plot_ekf_real_start.png?raw=true "Real Data EKF Start Time.")
-
-![Alt text](./assignments/project3/results/plot_ekf_real_end.png?raw=true "Real Data EKF End Time.")
+![Alt text](./assignments/project3/results/plot_ekf_pos.gif?raw=true "Real Data EKF Start Time.")
 
 ### Project 4
 

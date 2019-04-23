@@ -31,7 +31,7 @@ function h = laserdata_figure()
     axis([-10,10,-10,10]);               
     xlabel('X [m]');
     ylabel('Y [m]');
-    %     h.legend = legend('raw laserscan', 'highly reflecting', 'brilliant OOI');
+    h.legend = legend('OOIs Map','OOIs w/o EKF', 'Robot w/o EKF', 'Location', 'East', 'AutoUpdate','off');
     
     % Title
     h.title = title('');

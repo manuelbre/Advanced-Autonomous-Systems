@@ -24,8 +24,9 @@ function h = create_figure()
     end
     
     % Speed and Bias text
-    h.v_estimated = text(10,10, '', 'Color', 'k');
-    h.bias_estimated = text(10,9, '', 'Color', 'k');
+    h.v_estimated = text(3, 8, '', 'Color', 'k');
+    h.v = text(3, 7, '', 'Color', 'k');
+    h.bias_estimated = text(3, 6, '', 'Color', 'k');
 
     
     % Robot Position with arrow w/ EKF
@@ -44,14 +45,11 @@ function h = create_figure()
     axis([-10,10,-10,10]);               
     xlabel('X [m]');
     ylabel('Y [m]');
-    %     h.legend = legend('raw laserscan', 'highly reflecting', 'brilliant OOI');
+    h.legend = legend('OOIs Map','OOIs w/ EKF', 'OOIs w/o EKF', ...
+        'Robot w/ EKF', 'Robot w/o EKF', 'Location', 'East', 'AutoUpdate','off');
     
     % Title
     h.title = title('');
-    
-    % Legend
-%     legend('OOIs Map','OOIs Estimated', 'Robot','AutoUpdate','off');
-
 
     zoom on ;  grid on;    
     

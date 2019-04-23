@@ -1,6 +1,5 @@
 function [C, r_squared] = CircleFit(P)
     %% CircleFit
-    % Manuel Breitenstein, 14.03.2019
     %
     % Fit a circle for 2D points by solving a linear system of equations.
     %

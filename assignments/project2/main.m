@@ -35,6 +35,7 @@ attitude_set.theta_start = pi/2; % [rad]
 % Preprocess yawrate settings
 yawrate_set.t_stationary = 20; % [s]
 yawrate_set.inverted = true;
+yawrate_set.debias = true;
 
 % Speed Data parameters
 % time steps

@@ -19,7 +19,8 @@ function [yaw_rate] = preprocessYawrate(yaw_rate, t, opt)
     if ~exist('opt','var')
         opt.t_stationary = 0; % [s]
         opt.inverted = false;
-        opt.theta_start = 0; % [rad]
+        opt.theta_start = 0; % [rad
+        opt.debias = true;
     end
     
     % Variables
@@ -35,7 +36,6 @@ function [yaw_rate] = preprocessYawrate(yaw_rate, t, opt)
     yaw_rate_bias = mean(yaw_rate(1:idx_statioary));
     
     % Debias
-    yaw_rate = yaw_rate - yaw_rate_bias;
-        
-%     theta = wrapTo2Pi(theta);
+    if  opt.debias; yaw_rate = yaw_rate - yaw_rate_bias; end
+    
 end

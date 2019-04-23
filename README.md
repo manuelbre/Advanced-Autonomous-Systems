@@ -26,11 +26,12 @@ The task of this projects was to preprocess bearing and range measurements of th
 
 The goal of this project was to use IMU data to calculate the position of a wheeled robot.
 
-![Alt text](./assignments/project2/results/plot_sim_path.png?raw=true "Integrated Yawrate.")
+![Alt text](./assignments/project2/results/plot_robot_pos.gif?raw=true "Path Video.")
 
 ![Alt text](./assignments/project2/results/plot_robot_pos.png?raw=true "Resulting Path")
 
-![Alt text](./assignments/project2/results/plot_robot_pos.gif?raw=true "Path Video.")
+![Alt text](./assignments/project2/results/plot_w.png?raw=true "Integrated Yawrate.")
+
 
 ### Project 3
 [Project 3](./assignments/project3)
@@ -64,10 +65,10 @@ Path planning of a simulated mobile robot with help of genetic algorithms.The go
 #### Fuzzy Control
 Fuzzy of a mobile robot. The goal is to move the robot from a start position $S$ to a target position $T$. A moving virtual target with offset is used to improve the performance.
 
-![Alt text](./results/plot_fuzzy_control.png?raw=true "Frame of Mobile Robot Simulation.")
+![Alt text](./assignments/project4/results/plot_fuzzy_control.png?raw=true "Frame of Mobile Robot Simulation.")
 
 
 #### Swarm Optimization
 Find best hyperparameter for fuzzy control task with help Particle Swarm Optimization.
 
-![Alt text](./results/plot_particle_swarm.png?raw=true "Results of Swarm Optimization for Fuzzy Control of Mobile Robot.")
+![Alt text](./assignments/project4/results/plot_particle_swarm.png?raw=true "Results of Swarm Optimization for Fuzzy Control of Mobile Robot.")

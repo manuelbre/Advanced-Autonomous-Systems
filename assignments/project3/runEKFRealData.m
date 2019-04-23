@@ -16,8 +16,8 @@ addpath(genpath(dirs));
 
 % % % % % % % % % % % SETTINGS % % % % % % % % % %  % 
 estimate_yawrate_bias = true;
-estimate_v = false;
-plot_skipping = 4;
+estimate_v = true;
+plot_skipping = 1;
 % % % % % % % % % % % % % % % % % % % % % % % % % % %
 
 % Params 

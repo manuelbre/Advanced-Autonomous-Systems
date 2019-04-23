@@ -1,4 +1,4 @@
-function h = laserdata_figure()
+function h = create_figure()
     % --------------------------------------
     % Create graphical object for refreshing data during program execution.
     figure() ; clf(); 
@@ -12,6 +12,8 @@ function h = laserdata_figure()
     
     h.OOI_brilliant = plot(0, 0, 'r+', 'MarkerSize', 10); % Brilliant ....
                                             % object of interest.
+    h.OOI_brilliant_legacy = plot(0, 0, 'b+', 'MarkerSize', 10); % Brilliant ....
+                                            % object of interest.
     
     % Text
     h.OOI_brilliant_init_txt = cell(n_txt,1);
@@ -21,11 +23,22 @@ function h = laserdata_figure()
             h.OOI_brilliant_txt{i} = text(0,0, '', 'Color', 'r');
     end
     
-    % Robot Position with arrow
-    h.robot = quiver(0,0,0,0,0);
+    % Speed and Bias text
+    h.v_estimated = text(10,10, '', 'Color', 'k');
+    h.bias_estimated = text(10,9, '', 'Color', 'k');
+
+    
+    % Robot Position with arrow w/ EKF
+    h.robot = quiver([],[],[],[],0);
     h.robot.Color = 'm';
     h.robot.LineWidth = 2;
     h.robot.MaxHeadSize = 1;
+    
+    % Robot Position with arrow w/o EKF
+    h.robot_legacy = quiver([],[],[],[],0);
+    h.robot_legacy.Color = 'b';
+    h.robot_legacy.LineWidth = 2;
+    h.robot_legacy.MaxHeadSize = 1;
 
     % focuses plot on this region of interest
     axis([-10,10,-10,10]);               

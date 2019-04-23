@@ -14,6 +14,11 @@ close all;
 dirs = fileparts(which(mfilename)); 
 addpath(genpath(dirs));
 
+% % % % % % % % % % % SETTINGS % % % % % % % % % %  % 
+estimate_yawrate_bias = false;
+estimate_v = false;
+% % % % % % % % % % % % % % % % % % % % % % % % % % %
+
 % Params 
 % Default files and directories
 default_path_data_dir = './data';
@@ -54,7 +59,8 @@ laser_settings.verbose = false;
 laser_settings.d = 0.46; % Offset of Laser [m]
 global ABCD;
 ABCD.flagPause=0;
-X_0 = [0; 0 ; pi/2]; % [[m]; [m]; [rad]]
+
+X_0 = getInitState(estimate_yawrate_bias, estimate_v);
 
 % Data association parameters
 data_assoc_settings.dist_threshold = 0.4; % [m]
@@ -112,27 +118,17 @@ assert(isequal(t_raw_IMU, t_raw_v));
 stdev_yawrate = deg2rad(1.4); % [rad/second]
 stdev_v = 0.4; % [m/second]
 stdev_rangeMeasurement = 0.16; % [m]
-stdev_angleMeasurement = deg2rad(0.16); % [rad]
+stdev_angleMeasurement = deg2rad(1.1); % [rad]
 bias_yawrate = deg2rad(2.0); % [rad/second]
 
-% Initial covariance of state
-P = zeros(size(X_0,1));
+[P, P_u, Q_processModel, R] = getInitCovs(estimate_yawrate_bias, ...
+    estimate_v, stdev_yawrate, stdev_v, stdev_rangeMeasurement, ...
+    stdev_angleMeasurement, bias_yawrate);
 
-% Initial covariance of input
-P_u = [stdev_v.^2 0;...
-       0 stdev_yawrate.^2];
-   
-% Covariance of process model noise
-Q_processModel =  diag( [ (0.01)^2 ,(0.01)^2 , (1*pi/180)^2]);
-
-% Covariance of measurement Model
-R = [stdev_rangeMeasurement.^2 0 ;...
-     0 stdev_angleMeasurement.^2];
-
-%% Plot OOI in global coordinate frame
+%% MAIN
 
 % Create figure handle
-OOI_fig = laserdata_figure(); 
+OOI_fig = create_figure(); 
 
 % Preprocess yaw rate (Debiasing and change of coordinate system)
 w = preprocessYawrate(yaw_rate, t_w, yawrate_set);
@@ -145,19 +141,22 @@ i_vw = 2;
 i_laser = 1;
 t_vw = t_w; % [s]
 X = X_0; % [[m]; [m]; [rad]]
+X_legacy = X_0; % [[m]; [m]; [rad]]
 
 % Plot Initial OOI
-init_OOIs = plotLaserdataGlobalframeProj3( laser_scans(:, i_laser), t_laser(i_laser), ...
-                    X, OOI_fig.OOI_brilliant_init, OOI_fig.title,  ...
-                                                i_laser, laser_settings);
+init_OOIs = plotLaserdataGlobalframe( laser_scans(:, i_laser), ...
+            t_laser(i_laser), X, OOI_fig.OOI_brilliant_init, ...
+            OOI_fig.robot, OOI_fig.title, i_laser, laser_settings);
 
 % Data association
 init_OOIs = DataAssociationOOIs(init_OOIs, ...
-    data_assoc_settings.dist_threshold);
+            data_assoc_settings.dist_threshold);
 plotIDs(init_OOIs, OOI_fig.OOI_brilliant_init_txt, ...
-    data_assoc_settings.extra_txt_init);
+        data_assoc_settings.extra_txt_init);
 
 i_laser = i_laser + 1;
+use_laser_time = false;
+enable_legacy = true;
 
 while 1
     if (ABCD.flagPause), pause(0.2) ; continue ; end
@@ -167,74 +166,122 @@ while 1
     while (t_vw(i_vw) <= t_laser(i_laser))
         
         % EKF Process Model
-        dt = - t_vw(i_vw - 1) + t_vw(i_vw);
+        if use_laser_time
+            dt = - t_laser(i_laser - 1) + t_vw(i_vw);
+        else
+            dt = - t_vw(i_vw - 1) + t_vw(i_vw);
+        end
         assert(dt > 0);
         u =  [v(i_vw), w(i_vw)];
-        J_X = J_X(X, u, dt);
-        J_u = J_u(X, u, dt);
-        P = J_X*P*J_X' + J_u*P_u*J_u.' + Q_processModel; % P(K+1|K)
+        J_X_val = J_X(X, u, dt);
+        J_u_val = J_u(X, u, dt);
+        P = J_X_val * P * J_X_val.' + J_u_val * P_u * J_u_val.' + Q_processModel; % P(K+1|K)
 
         % Calculate expected value of X
         % X(k+1|k) = f( X(k|k), u(k) )
-        X = processModel(X, u, t_vw(i_vw - 1), t_vw(i_vw));
+        if use_laser_time
+            X = processModel(X, u, t_laser(i_laser - 1), t_vw(i_vw));
+        else
+            X = processModel(X, u, t_vw(i_vw - 1), t_vw(i_vw));
+        end
+        
+        if enable_legacy
+            X_legacy = updateState(X_legacy, t_vw(i_vw - 1), v(i_vw), w(i_vw), t_vw(i_vw));
+        end
         
         i_vw = i_vw + 1;
+        use_laser_time = false;
+        
     end
     
         % More precise update due to diff in frequency of measruements
         % Calculate expected value of X
         % X(k+1|k) = f( X(k|k), u(k) )
-        X_laser = processModel(X, u, t_vw(i_vw - 1), t_laser(i_laser));
+        dt = - t_vw(i_vw - 1) + t_laser(i_laser);
+        u =  [v(i_vw - 1), w(i_vw - 1)];
+        J_X_val = J_X(X, u, dt);
+        J_u_val = J_u(X, u, dt);
+        P = J_X_val * P * J_X_val.' + J_u_val * P_u * J_u_val.' + Q_processModel; % P(K+1|K)
+        X = processModel(X, u, t_vw(i_vw - 1), t_laser(i_laser));
+        use_laser_time = true;
         
         % EKF Measurement Model
         % Get Measurements
         [r_f, alpha_f, intens] = getMeasurements(laser_scans(:, i_laser));
         % Project Measurements to center of kinematic model
-        [r, alpha] = projectMeasurements(r_f, alpha_f, laser_settings.d);
-        
-        % Extract object of interest and plot brillian OOI                   
-        OOIs = plotLaserdataGlobalframeProj3( laser_scans(:, i_laser), t_laser(i_laser),...
-                X_laser, OOI_fig.OOI_brilliant, OOI_fig.title, ...
-                                                i_laser, laser_settings);
-        
+        [r_C, alpha_C] = projectMeasurements(r_f, alpha_f, laser_settings.d);
+        % Convert to cartesian coordinates
+        [x_L, y_L] = pol2cart(alpha_C, r_C);
+        % Extract OOI
+        OOIs = ExtractOOIs(x_L, y_L, intens, ...
+                    laser_settings.use_circle_fit);
+        % Convert from local laser to global coordinate frame
+        OOIs.Centers_G = zeros(size(OOIs.Centers));
+        [OOIs.Centers_G(:,1), OOIs.Centers_G(:,2)] = ...
+                Laser2Global(OOIs.Centers(:,1), OOIs.Centers(:,2), X, 0.0);
+      
         % Data association
-        OOIs = DataAssociationOOIs(OOIs, data_assoc_settings.dist_threshold, ...
-                                                                    init_OOIs);
-        plotIDs(OOIs, OOI_fig.OOI_brilliant_txt, data_assoc_settings.extra_txt);
+        OOIs = DataAssociationOOIs(OOIs, ...
+            data_assoc_settings.dist_threshold, init_OOIs);
         
-         % Get brilliant OOI
+        % Get brilliant OOI wit nonzero IDs
         N_nonzero_IDs = nnz(OOIs.IDs);
         nonzero_IDs = OOIs.IDs(OOIs.IDs~=0);
-        nonzero_C_G = OOIs.Centers_G(OOIs.IDs~=0,:);
-        nonzero_angle_measurement = OOIs.angle_measurement(OOIs.IDs~=0,:);
-        nonzero_range_measurement = OOIs.range_measurement(OOIs.IDs~=0,:);
         
         if N_nonzero_IDs > 0
             for ii = 1:N_nonzero_IDs
                 ID = nonzero_IDs(ii);
-                angle = nonzero_angle_measurement(ID);
-                range = nonzero_range_measurement(ID);
+                measured_C_G =  OOIs.Centers_G(OOIs.IDs==ID, :);
 
                 % Get Center of initial OOIs
-                init_OOI_Center = init_OOIs.Centers_G(init_OOIs.ID == ID, :);
+                init_OOI_Center = init_OOIs.Centers_G(init_OOIs.IDs == ID, :);
 
                 % Measurement model to get expected measurements
-                [E_range, E_angle, H] = measurementModel(init_OOI_Center, X);
-                % Residual of actual measurements to expected measutements.
-                z  = [ range - E_range               ; ...              
-                       wrapToPi(angle - E_angle)];
+                [E_range, E_angle, H] = ...
+                                      measurementModel(init_OOI_Center, X);
+                % Measurement model to get measurements
+                [measured_range, measured_angle, ~] = ...
+                                      measurementModel(measured_C_G, X);
+                
+                % Residual of actual measurements to expected measurements.
+                z  = [ measured_range - E_range; ...              
+                       wrapToPi(measured_angle - E_angle)];
 
                 % Update state with help of residual and kalman Gain
                 K = KalmanGain(R, H, P);
-                X = X + K * z ;       % update the expected value of the state to X(k+1|k+1)
-                P = P - K * H * P ;   % update the Covariance of the state P(k+1|k+1)
+                % Update the expected value of the state to X(k+1|k+1)
+                X = X + K * z ;       
+                % Update the Covariance of the state P(k+1|k+1)
+                P = P - K * H * P ;   
+                
             end
         end
         
-        % Robot Location
+        % % % % % % % % % % % % % % % Plots % % % % % % % % % % % % % % % % 
+        % Plot IDS
+        plotIDs(OOIs, OOI_fig.OOI_brilliant_txt, data_assoc_settings.extra_txt);
+        % Plot OOIs
+        % Get brilliant OOI
+        x_G = OOIs.Centers_G(OOIs.Color ~= 0, 1);
+        y_G = OOIs.Centers_G(OOIs.Color ~= 0, 2);
+        set(OOI_fig.OOI_brilliant, 'xdata', x_G, 'ydata', y_G);
+        % Plot Robot Location
         set(OOI_fig.robot,'XData', X(1), 'YData', X(2), 'UData',...
-                        cos(X(3)) ,'VData', sin(X(3)));
-
+                    cos(X(3)) ,'VData', sin(X(3)));
+        % Update Title
+        s = sprintf('Laser scan # [%d] at time [%.3f] secs', i_laser, ...
+                    t_laser(i_laser));
+        set(OOI_fig.title,'string', s);
+        % % % % % % % % % % % % % % %  % %  % % % % % % % % % % % % % % % % 
+        
+        if enable_legacy
+            X_laser = updateState(X_legacy, t_vw(i_vw-1), v(i_vw), w(i_vw), ...
+                                                                t_laser(i_laser));
+            % Plot object of interests                                          
+            [~] = plotLaserdataGlobalframe( laser_scans(:, i_laser), t_laser(i_laser),...
+                        X_laser, OOI_fig.OOI_brilliant_legacy, OOI_fig.robot_legacy, OOI_fig.title, ...
+                                                        i_laser, laser_settings);
+        end
     
     % Increment laser data index
     i_laser = i_laser + laser_increment;
@@ -321,15 +368,20 @@ function [ranges_proj, angles_proj] = projectMeasurements(ranges, angles, offset
     % OUTPUT:
     %       - ranges_proj (Nx2): Range [m] projected  at center of ...
     %                            Kinematic Model.
-    %       - angles_proj (Nx2): angles [rad] projected  at center of ...
+    %       - angles_proj (Nx2): Angles [rad] projected  at center of ...
     %                            Kinematic Model.
    
     %% Function
-    vec = [ranges.* cos(angles) ranges.* sind(angles)];
+    
+    vec_measur = [ranges.* cos(angles) ranges.* sin(angles)];
     vec_offset = [0 offset];
-    vec_projected = vec_offset + vec;
+    vec_projected = vec_offset + vec_measur;
+    
+    % recalculate ranges and angles
     ranges_proj = sqrt(vec_projected(:,1).^2 + vec_projected(:,2).^2);
-    angles_proj = atan2(vec_projected(:,1),vec_projected(:,2));
+    angles_proj = atan2(vec_projected(:,2), vec_projected(:,1));
+    
+    % sanity check
     assert(isequal(size(ranges_proj),size(angles_proj)));
 end
 
@@ -360,14 +412,16 @@ function [X] = processModel(X_prev, u_cur, t_prev, t_cur)
     w = u_cur(2);
     
     if length(X_prev) == 3
+        X(1) = X_prev(1) + v * cos(X_prev(3)) * dt; % [m]
+        X(2) = X_prev(2) + v * sin(X_prev(3)) * dt; % [m]
         X(3) = X_prev(3) + w * dt; % [rad]
-        X(1) = X_prev(1) + v * cos(X(3)) * dt; % [m]
-        X(2) = X_prev(2) + v * sin(X(3)) * dt; % [m]
     
-    elseif length(X_prev) == 4
-        X(3) = X_prev(3) + w * dt; % [rad]
-        X(1) = X_prev(1) + v * cos(X(3)) * dt; % [m]
-        X(2) = X_prev(2) + v * sin(X(3)) * dt; % [m]
+    elseif length(X_prev) == 26
+        X(1) = X_prev(1) + v * cos(X_prev(3)) * dt; % [m]
+        X(2) = X_prev(2) + v * sin(X_prev(3)) * dt; % [m]
+        X(3) = X_prev(3) + (w - X_prev(4)) * dt; % [rad]
+        X(4) = X_prev(4); % [rad/s]
+
     else
         error('X has wrong dimension')
     end
@@ -399,11 +453,11 @@ function [E_range, E_angle, H] = measurementModel(P_landmarks, X)
     
      % Jacobian of measuremnet model H=dh/du
     if length(X) == 4
-        H = [ -dx./E_range,   -dy./E_range,     0, 0;...
-               dy./E_range_sq, dy./E_range_sq, -1, 0];
+        H = [ - dx./E_range,    - dy./E_range,     0, 0;...
+                dy./E_range_sq, - dx./E_range_sq, -1, 0];
     elseif length(X) == 3
-        H = [ -dx./E_range,   -dy./E_range,     0;...
-               dy./E_range_sq, dy./E_range_sq, -1];
+        H = [ - dx./E_range,    - dy./E_range,     0;...
+                dy./E_range_sq, - dx./E_range_sq, -1];
     else
         error('X has wrong dimension')
     end
@@ -420,7 +474,52 @@ function [K] =  KalmanGain(R, H, P)
     % Output:
     %       - K: Gain for Kalman filter
     %% Function
-    S = R + H*P*H' ;
-    K = P*H'*S^(-1) ;
+    S = R + H * P * H.' ;
+    K = P * H.' * S^(-1) ;
 end
 
+function [X_0] = getInitState(estimate_yawrate_bias, estimate_v)
+%% Get initial robot state depending on flags
+if ~any([estimate_yawrate_bias, estimate_v])
+    X_0 = [0; 0 ; pi/2]; % [[m]; [m]; [rad]]
+elseif estimate_yawrate_bias && ~estimate_v
+    X_0 = [0; 0 ; pi/2; 0]; % [[m]; [m]; [rad]]
+elseif estimate_yawrate_bias && estimate_v
+    X_0 = [0; 0 ; pi/2]; % [[m]; [m]; [rad]]
+else
+    error('No action defined for flag.');
+end
+    
+end
+
+function [P, P_u, Q_processModel, R] = getInitCovs(estimate_yawrate_bias, ...
+    estimate_v, stdev_yawrate, stdev_v, stdev_rangeMeasurement, ...
+    stdev_angleMeasurement, bias_yawrate)
+    %% Helper function for initial covariance initialization
+    %
+    % OUTPUT:
+    %       - P: Initial covariance of state noise
+    %       - P_u: Initial covariance of input noise
+    %       - Q_processModel: Covariance of process model noise
+    %       - R: Covariance of measurement model noise
+
+if ~any([estimate_yawrate_bias, estimate_v])
+    P = zeros(3,1);
+    P_u = [stdev_v.^2 0;...
+       0 stdev_yawrate.^2];
+    Q_processModel =  diag( [ (0.01)^2, (0.01)^2 , (0.05*pi/180)^2]);
+    R = [stdev_rangeMeasurement.^2 0 ;...
+         0 stdev_angleMeasurement.^2];
+     
+elseif estimate_yawrate_bias && ~estimate_v
+    P = zeros(4,1);
+    
+elseif estimate_yawrate_bias && estimate_v
+    P = zeros(5,1);
+    
+else
+    error('No action defined for flag.');
+    
+end
+
+end

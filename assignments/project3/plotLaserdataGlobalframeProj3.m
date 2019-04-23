@@ -15,11 +15,6 @@ function OOIs = plotLaserdataGlobalframeProj3(scan, t, X, plot_handle_laser,...
     
     %% Function
     
-    % Get Measurements
-    [r_f, angles_C, intens] = getMeasurements(scan);
-    % Project Measurements to center of kinematic model
-    [r_C, angles_C] = projectMeasurements(r_f, angles_C, laser_settings.d);
-    
     % Old pipeline for extracting OOI
     [x_L, y_L, intens] = convertScan2Cartesian(scan);
     

@@ -22,11 +22,11 @@ function [X_end, X_T] = fuzzyControl (map_range, d_virt_T_0, t_end, dt, disp_sim
 %% INITIALIZATION
 
 % Add that folder plus all subfolders to the path.
-dirs = fileparts(which(mfilename)); 
+dirs = fileparts(which(mfilename));
 addpath(genpath(dirs));
 
 % Params
-default_vel_fis_file = 'MTRN4010_vel.fis';
+default_vel_fis_file = 'MTRN4010_vel_2.fis';
 default_ang_fis_file = 'MTRN4010_ang.fis';
 if ~exist('vel_fis_file','var'), vel_fis_file = default_vel_fis_file; end
 if ~exist('ang_fis_file','var'), ang_fis_file = default_ang_fis_file; end
@@ -66,7 +66,7 @@ if ~exist('dt','var'), dt = dt_default; end
 d_virt_T_0_default = 10;
 if ~exist('d_virt_T_0','var'), d_virt_T_0 = d_virt_T_0_default; end
 % Threshold to lower virtual target distance [m]
-d_virt_T_threshold = 10; 
+d_virt_T_threshold = 10;
 % Define update rule of virt target
 virt_T_time_update = true;
 
@@ -95,7 +95,7 @@ while t <= t_end
     % Angular difference to virtual target
     phi = atan2(X_virt(2) - X(2), X_virt(1) - X(1));
     d_ang = wrapToPi(phi - X(3));
-    
+
     % Update virtual target distance
     if virt_T_time_update
         % Update virtual target distance according to time
@@ -106,7 +106,7 @@ while t <= t_end
             d_virt_T = d_virt_T_0 * d_dist/d_virt_T_threshold;
         end
     end
-    
+
     % Update virtual target state
     X_virt = get_virt_target(X_T, d_virt_T);
 
@@ -116,12 +116,12 @@ while t <= t_end
 
     % Update robot state
     X = kinematicModel(X, u, dt);
-    
+
     % Update figure
     if disp_sim
         update_figure(h, X, X_virt, X_T, d_dist, d_ang, t)
     end
-    
+
     % Timestep
     t = t + dt;
 end
@@ -179,7 +179,7 @@ end
 
 function [h] = create_figure(axis_range, X_0)
 %% Create figure
-% INPUT: 
+% INPUT:
 %       - axis_range (1 x 4): Range of axis to be used for figure.
 %       - X_0 (3 x 1): Initial robot position [x ; y ; theta]
 %
@@ -218,7 +218,7 @@ end
 function [] = update_figure(h, X, X_virt, X_T, d_dist, d_ang, t)
 %% Update and show figure
 %
-% INPUT: 
+% INPUT:
 %       - h: Struc containing figure handles
 %       - X (3 x 1): Robot state [x ; y ; theta]
 %       - X_virt (3 x 1): Vortual state [x ; y ; theta]
@@ -238,9 +238,9 @@ shape_X_T = h.get_shape(X_T);
 
 % Update data
 set(h.trace, 'xdata', [h.trace.XData X(1)], 'ydata', [h.trace.YData X(2)]);
-set(h.robot, 'xdata', shape_X(1,:) ,'ydata', shape_X(2,:)); 
-set(h.virt_T, 'xdata', shape_X_virt(1,:) ,'ydata', shape_X_virt(2,:)); 
-set(h.T, 'xdata', shape_X_T(1,:) ,'ydata', shape_X_T(2,:)); 
+set(h.robot, 'xdata', shape_X(1,:) ,'ydata', shape_X(2,:));
+set(h.virt_T, 'xdata', shape_X_virt(1,:) ,'ydata', shape_X_virt(2,:));
+set(h.T, 'xdata', shape_X_T(1,:) ,'ydata', shape_X_T(2,:));
 
 % Update title and pause shortly
 title(sprintf('Time %0.3f, d_{dist} = %0.3f m, d_{ang} = %0.3f rad', t, d_dist, d_ang));

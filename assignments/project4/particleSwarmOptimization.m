@@ -46,7 +46,7 @@ disp_sim = false;
 % % % % % % % % % Params % % % % % % % % % % % % 
 
 % Fis files
-default_vel_fis_file = 'MTRN4010_vel.fis';
+default_vel_fis_file = 'MTRN4010_vel_2.fis';
 default_ang_fis_file = 'MTRN4010_ang.fis';
 if ~exist('vel_fis_file','var'), vel_fis_file = default_vel_fis_file; end
 if ~exist('ang_fis_file','var'), ang_fis_file = default_ang_fis_file; end

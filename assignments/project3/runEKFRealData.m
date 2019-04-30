@@ -7,7 +7,7 @@
 % this point.
 
 function runEKFRealData(path_data_dir, path_IMU_data, path_Speed_data, ...
-                                path_project1, default_path_project2)
+                                path_project1, path_project2)
 %% Preprocessing
 close all;
 % Add that folder plus all subfolders to the path.
@@ -15,8 +15,8 @@ dirs = fileparts(which(mfilename));
 addpath(genpath(dirs));
 
 % % % % % % % % % % % SETTINGS % % % % % % % % % %  % 
-estimate_yawrate_bias = true;
-estimate_v = true;
+estimate_yawrate_bias = false;
+estimate_v = false;
 plot_skipping = 1;
 % % % % % % % % % % % % % % % % % % % % % % % % % % %
 

@@ -30,9 +30,9 @@ d_virt_T_range = [0; 50];
 % Particle velocity range
 part_vel_range = [-1; 1];
 % Particle personal best coefficient (cognition coefficient)
-c_p = 0.7;
+c_p = 0.5;
 % Particle global best coefficient (social coefficient)
-c_g = 1;
+c_g = 0.5;
 
 % End time [s]
 t_end = 300;

@@ -89,8 +89,8 @@ classdef Particles < handle
       
       function [] = updateVelPos(obj)
          % Personal and global best residuals
-         p_diff = (obj.positions - obj.personalBests.pos);
-         g_diff = (obj.positions - obj.globalBest.pos);
+         p_diff = (obj.positions - obj.personalBests.pos) * (-1);
+         g_diff = (obj.positions - obj.globalBest.pos) * (-1);
          
          % Update velocities and positions
          obj.velocities = obj.velocities + ...

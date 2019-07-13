@@ -3,14 +3,14 @@ Assignments for the UNSW class [Advanced Autonomous Systems](https://www.handboo
 
 ## Assignments
 [Assignments](./assignments) contains my solution to the class assignments.
-The assignments are in the realm of sensor fusion, system modeling and finally genetic algorithms.
+The assignments are in the realm of sensor fusion, system modeling and genetic algorithms.
 
 In the following I will give a short overview of the tasks and show some results.
-Project 1 to 3 are based on each other. The task was to process Lidar and IMU data of a wheeled mobile robot.
+Project 1 to 3 are based on the same project. The task was to process Lidar and IMU data of a wheeled mobile robot.
 First the data is clustered in project 1 to detect landmarks.
 In project 2 the IMU data is used to localize the robot by integration of the sensor data.
 Finally in project 3 an Extended Kalman Filter (EKF) is used for sensor fusion.
-Project 4 on the other hand is independent on the other projects and is about genetic algorithms.
+Project 4 on the other hand is independent of the other projects and is about genetic algorithms.
 
 ### Project 1
 [Project 1](./assignments/project1)
